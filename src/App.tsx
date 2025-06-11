@@ -43,6 +43,7 @@ function App() {
   ]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [incidentId, setIncidentId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -52,6 +53,15 @@ function App() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    // Get incidentId from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const incidentIdParam = urlParams.get('incidentId');
+    if (incidentIdParam) {
+      setIncidentId(incidentIdParam);
+    }
+  }, []);
 
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
@@ -130,7 +140,19 @@ function App() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex overflow-hidden relative">
+      {/* Incident ID Display */}
+      {incidentId && (
+        <div className="absolute top-4 right-4 z-50 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg px-3 py-2 shadow-lg">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+            <span className="text-sm font-medium text-gray-700">
+              Incident ID: <span className="font-mono text-orange-600">{incidentId}</span>
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Left Sidebar */}
       <div className="w-80 bg-white/80 backdrop-blur-sm border-r border-gray-200 p-6 flex flex-col overflow-y-auto">
         <div className="mb-8">

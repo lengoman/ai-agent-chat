@@ -139,7 +139,7 @@ function App() {
               <MessageCircle className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-              AI Assistant
+              AI-Chat-Bot
             </h1>
           </div>
           <p className="text-gray-600 text-sm">Choose from quick options below or start typing</p>
@@ -217,7 +217,7 @@ function App() {
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-800">AI Assistant</h2>
+              <h2 className="font-semibold text-gray-800">AI-Chat-Bot</h2>
               <p className="text-sm text-green-600 flex items-center gap-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 Online

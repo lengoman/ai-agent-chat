@@ -44,6 +44,7 @@ function App() {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [incidentId, setIncidentId] = useState<string | null>(null);
+  const [facilityId, setFacilityId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -55,11 +56,17 @@ function App() {
   }, [messages]);
 
   useEffect(() => {
-    // Get incidentId from URL parameters
+    // Get incidentId and facilityId from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const incidentIdParam = urlParams.get('incidentId');
+    const facilityIdParam = urlParams.get('facilityId');
+    
     if (incidentIdParam) {
       setIncidentId(incidentIdParam);
+    }
+    
+    if (facilityIdParam) {
+      setFacilityId(facilityIdParam);
     }
   }, []);
 
@@ -141,15 +148,29 @@ function App() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex overflow-hidden relative">
-      {/* Incident ID Display */}
-      {incidentId && (
-        <div className="absolute top-4 right-4 z-50 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg px-3 py-2 shadow-lg">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-            <span className="text-sm font-medium text-gray-700">
-              Incident ID: <span className="font-mono text-orange-600">{incidentId}</span>
-            </span>
-          </div>
+      {/* ID Display - Top Right Corner */}
+      {(incidentId || facilityId) && (
+        <div className="absolute top-4 right-4 z-50 space-y-2">
+          {incidentId && (
+            <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg px-3 py-2 shadow-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span className="text-sm font-medium text-gray-700">
+                  Incident ID: <span className="font-mono text-orange-600">{incidentId}</span>
+                </span>
+              </div>
+            </div>
+          )}
+          {facilityId && (
+            <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg px-3 py-2 shadow-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm font-medium text-gray-700">
+                  Facility ID: <span className="font-mono text-blue-600">{facilityId}</span>
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

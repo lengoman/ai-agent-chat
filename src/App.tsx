@@ -70,6 +70,72 @@ function App() {
     }
   }, []);
 
+  const isFacilityId = (text: string): boolean => {
+    // Check if the text looks like a facility ID (e.g., FAC-123, FACILITY-456, etc.)
+    const facilityIdPattern = /^(FAC|FACILITY|F)-?\d+$/i;
+    return facilityIdPattern.test(text.trim());
+  };
+
+  const processFacilityAnalysis = async (facilityIdText: string) => {
+    const processingSteps = [
+      `Fetching data for ${facilityIdText}...`,
+      "Retrieving Incidents...",
+      "Analyzing KPIs...",
+      "Summarizing Data...",
+      "This is what I found while running the analysis..."
+    ];
+
+    for (let i = 0; i < processingSteps.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const stepMessage: Message = {
+        id: `${Date.now()}-${i}`,
+        text: processingSteps[i],
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, stepMessage]);
+      
+      if (i < processingSteps.length - 1) {
+        setIsTyping(true);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setIsTyping(false);
+      }
+    }
+
+    // Final analysis result
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const analysisResult: Message = {
+      id: `${Date.now()}-final`,
+      text: `📊 **Facility Analysis Report for ${facilityIdText}**
+
+**Key Findings:**
+• **Total Incidents:** 23 (↓15% from last month)
+• **Critical KPIs:**
+  - Uptime: 98.7% (Target: 99%)
+  - Response Time: 2.3 minutes (Target: <3 min)
+  - Resolution Rate: 94.2% (↑8% improvement)
+
+**Top Issues:**
+1. Equipment maintenance alerts (8 incidents)
+2. Network connectivity issues (5 incidents)
+3. Environmental monitoring alerts (4 incidents)
+
+**Recommendations:**
+• Schedule preventive maintenance for Equipment Zone A
+• Upgrade network infrastructure in Building 2
+• Review environmental sensor calibration
+
+Would you like me to dive deeper into any specific area or generate a detailed report?`,
+      sender: 'bot',
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, analysisResult]);
+    setIsTyping(false);
+  };
+
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
 
@@ -84,7 +150,13 @@ function App() {
     setInputText('');
     setIsTyping(true);
 
-    // Simulate bot response
+    // Check if the input is a facility ID
+    if (isFacilityId(text.trim())) {
+      processFacilityAnalysis(text.trim());
+      return;
+    }
+
+    // Regular bot response for non-facility ID inputs
     setTimeout(() => {
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -294,7 +366,7 @@ function App() {
                   ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white'
                   : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
               }`}>
-                <p className="text-sm leading-relaxed">{message.text}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
                 <p className={`text-xs mt-1 ${
                   message.sender === 'user' ? 'text-pink-100' : 'text-gray-500'
                 }`}>
@@ -348,7 +420,7 @@ function App() {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputText)}
-                placeholder="Type your message..."
+                placeholder="Type your message or facility ID (e.g., FAC-123)..."
                 className="w-full px-4 py-3 pr-12 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
               />
               <button

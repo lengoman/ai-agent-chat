@@ -46,6 +46,7 @@ function App() {
   const [isTyping, setIsTyping] = useState(false);
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [facilityId, setFacilityId] = useState<string | null>(null);
+  const [hasAutoProcessed, setHasAutoProcessed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -70,6 +71,34 @@ function App() {
       setFacilityId(facilityIdParam);
     }
   }, []);
+
+  // Auto-process facility analysis when facilityId is available
+  useEffect(() => {
+    const autoProcessFacility = async () => {
+      if (facilityId && !hasAutoProcessed) {
+        setHasAutoProcessed(true);
+        
+        // Add a small delay to let the initial greeting show first
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Add user message showing the facility ID was detected
+        const userMessage: Message = {
+          id: `auto-${Date.now()}`,
+          text: `Analyzing facility: ${facilityId}`,
+          sender: 'user',
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, userMessage]);
+        
+        // Wait a moment then start the analysis
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await processFacilityAnalysis(facilityId);
+      }
+    };
+
+    autoProcessFacility();
+  }, [facilityId, hasAutoProcessed]);
 
   const isFacilityId = (text: string): boolean => {
     // More flexible pattern to catch various facility ID formats

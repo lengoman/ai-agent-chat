@@ -29,7 +29,8 @@ const predefinedResponses = [
   "How do I get started?",
   "What features are available?",
   "I need technical support",
-  "Reports"
+  "Reports",
+  "FAC-123"
 ];
 
 function App() {
@@ -71,22 +72,31 @@ function App() {
   }, []);
 
   const isFacilityId = (text: string): boolean => {
-    // Check if the text looks like a facility ID (e.g., FAC-123, FACILITY-456, etc.)
+    // More flexible pattern to catch various facility ID formats
     const facilityIdPattern = /^(FAC|FACILITY|F)-?\d+$/i;
-    return facilityIdPattern.test(text.trim());
+    const trimmedText = text.trim();
+    
+    // Also check if it contains "facility" or starts with common facility prefixes
+    return facilityIdPattern.test(trimmedText) || 
+           trimmedText.toLowerCase().includes('facility') ||
+           /^(building|site|location|plant)-?\d+$/i.test(trimmedText);
   };
 
   const processFacilityAnalysis = async (facilityIdText: string) => {
     const processingSteps = [
-      `Fetching data for ${facilityIdText}...`,
-      "Retrieving Incidents...",
-      "Analyzing KPIs...",
-      "Summarizing Data...",
-      "This is what I found while running the analysis..."
+      `🔍 Fetching data for ${facilityIdText}...`,
+      "📋 Retrieving Incidents...",
+      "📊 Analyzing KPIs...",
+      "📈 Summarizing Data...",
+      "✅ Analysis Complete! Here's what I found:"
     ];
 
+    // Add each processing step with delays
     for (let i = 0; i < processingSteps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Show typing indicator first
+      setIsTyping(true);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setIsTyping(false);
       
       const stepMessage: Message = {
         id: `${Date.now()}-${i}`,
@@ -97,46 +107,63 @@ function App() {
       
       setMessages(prev => [...prev, stepMessage]);
       
-      if (i < processingSteps.length - 1) {
-        setIsTyping(true);
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setIsTyping(false);
-      }
+      // Wait before next step
+      await new Promise(resolve => setTimeout(resolve, 1200));
     }
 
-    // Final analysis result
+    // Show typing for final result
+    setIsTyping(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsTyping(false);
+
+    // Final analysis result
     const analysisResult: Message = {
       id: `${Date.now()}-final`,
       text: `📊 **Facility Analysis Report for ${facilityIdText}**
 
-**Key Findings:**
+**🎯 Key Performance Indicators:**
+• **Uptime:** 98.7% (Target: 99%) ⚠️
+• **Response Time:** 2.3 minutes (Target: <3 min) ✅
+• **Resolution Rate:** 94.2% (↑8% improvement) 📈
+• **Energy Efficiency:** 87.5% (↑3% from last month) 🔋
+
+**📋 Incident Summary:**
 • **Total Incidents:** 23 (↓15% from last month)
-• **Critical KPIs:**
-  - Uptime: 98.7% (Target: 99%)
-  - Response Time: 2.3 minutes (Target: <3 min)
-  - Resolution Rate: 94.2% (↑8% improvement)
+• **Critical:** 2 incidents
+• **High Priority:** 6 incidents  
+• **Medium Priority:** 15 incidents
 
-**Top Issues:**
-1. Equipment maintenance alerts (8 incidents)
-2. Network connectivity issues (5 incidents)
-3. Environmental monitoring alerts (4 incidents)
+**🔧 Top Issues Identified:**
+1. **Equipment Maintenance** (8 incidents)
+   - HVAC System alerts in Zone A
+   - Conveyor belt maintenance overdue
+2. **Network Connectivity** (5 incidents)
+   - Intermittent WiFi in Building 2
+   - Ethernet port failures
+3. **Environmental Monitoring** (4 incidents)
+   - Temperature sensor calibration needed
+   - Humidity levels exceeding thresholds
 
-**Recommendations:**
+**💡 Recommendations:**
 • Schedule preventive maintenance for Equipment Zone A
-• Upgrade network infrastructure in Building 2
-• Review environmental sensor calibration
+• Upgrade network infrastructure in Building 2  
+• Review environmental sensor calibration schedule
+• Consider backup power solutions for critical systems
 
-Would you like me to dive deeper into any specific area or generate a detailed report?`,
+**📈 Trending Metrics:**
+• Incident response time improved by 12%
+• Equipment downtime reduced by 8%
+• Customer satisfaction score: 4.2/5
+
+Would you like me to dive deeper into any specific area, generate a detailed report, or analyze another facility?`,
       sender: 'bot',
       timestamp: new Date()
     };
     
     setMessages(prev => [...prev, analysisResult]);
-    setIsTyping(false);
   };
 
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim()) return;
 
     const userMessage: Message = {
@@ -148,15 +175,15 @@ Would you like me to dive deeper into any specific area or generate a detailed r
 
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
-    setIsTyping(true);
 
     // Check if the input is a facility ID
     if (isFacilityId(text.trim())) {
-      processFacilityAnalysis(text.trim());
+      await processFacilityAnalysis(text.trim());
       return;
     }
 
     // Regular bot response for non-facility ID inputs
+    setIsTyping(true);
     setTimeout(() => {
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),

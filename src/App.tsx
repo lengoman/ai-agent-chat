@@ -34,19 +34,13 @@ const predefinedResponses = [
 ];
 
 function App() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hello! I'm your AI assistant. How can I help you today?",
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [facilityId, setFacilityId] = useState<string | null>(null);
   const [hasAutoProcessed, setHasAutoProcessed] = useState(false);
+  const [hasQueryParams, setHasQueryParams] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -63,12 +57,26 @@ function App() {
     const incidentIdParam = urlParams.get('incidentId');
     const facilityIdParam = urlParams.get('facilityId');
     
+    // Check if we have any query parameters
+    const hasParams = incidentIdParam || facilityIdParam;
+    setHasQueryParams(!!hasParams);
+    
     if (incidentIdParam) {
       setIncidentId(incidentIdParam);
     }
     
     if (facilityIdParam) {
       setFacilityId(facilityIdParam);
+    }
+
+    // Only add the greeting message if there are no query parameters
+    if (!hasParams) {
+      setMessages([{
+        id: '1',
+        text: "Hello! I'm your AI assistant. How can I help you today?",
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
     }
   }, []);
 
@@ -77,9 +85,6 @@ function App() {
     const autoProcessFacility = async () => {
       if (facilityId && !hasAutoProcessed) {
         setHasAutoProcessed(true);
-        
-        // Add a small delay to let the initial greeting show first
-        await new Promise(resolve => setTimeout(resolve, 1500));
         
         // Add user message showing the facility ID was detected
         const userMessage: Message = {
